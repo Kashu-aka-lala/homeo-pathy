@@ -1,0 +1,10 @@
+{
+  "name": "homeo-pathy",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm run dev --prefix generator",
+    "build": "npm run build --prefix generator",
+    "start": "npm run start --prefix generator"
+  }
+}
