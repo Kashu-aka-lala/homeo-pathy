@@ -26,6 +26,7 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
     { remedy: '', potency: '30C', vehicle: 'Pills Size 40', dosage: '4 pills TDS', duration: '7 Days' }
   ]);
   const [selectedPrecautions, setSelectedPrecautions] = useState<string[]>([]);
+  const [customPrecaution, setCustomPrecaution] = useState('');
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [isSendingWhatsApp, setIsSendingWhatsApp] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -142,6 +143,16 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
     } else {
       setSelectedPrecautions([...selectedPrecautions, precaution]);
     }
+  };
+
+  const handleAddCustomPrecaution = () => {
+    const trimmed = customPrecaution.trim();
+    if (!trimmed || selectedPrecautions.includes(trimmed)) {
+      setCustomPrecaution('');
+      return;
+    }
+    setSelectedPrecautions([...selectedPrecautions, trimmed]);
+    setCustomPrecaution('');
   };
 
   const handleSavePrescription = async (): Promise<Prescription | null> => {
@@ -345,6 +356,7 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
                 onChange={(e) => handleUpdateField(index, 'potency', e.target.value)}
                 className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
               >
+                <option value="">— None —</option>
                 {POTENCIES.map((p) => (
                   <option key={p} value={p}>{p}</option>
                 ))}
@@ -414,8 +426,9 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
       </div>
 
       {/* Dietary Restrictions Tags */}
-      <div className="space-y-2">
-        <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">Dietary Restrictions & Precautions</label>
+      <div className="space-y-3">
+        <label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground block">Dietary Restrictions &amp; Precautions</label>
+        {/* Pre-defined preset chips */}
         <div className="flex flex-wrap gap-1.5">
           {DIET_PRECAUTIONS_PRESETS.map((tag) => {
             const isSelected = selectedPrecautions.includes(tag);
@@ -435,6 +448,47 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
               </button>
             );
           })}
+          {/* Custom (non-preset) chips that were added manually */}
+          {selectedPrecautions
+            .filter((p) => !DIET_PRECAUTIONS_PRESETS.includes(p))
+            .map((tag) => (
+              <button
+                key={tag}
+                type="button"
+                onClick={() => handleTogglePrecaution(tag)}
+                className="flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-all focus:outline-none bg-rose-500/10 border-rose-500/30 text-rose-600 dark:text-rose-400"
+                title="Click to remove"
+              >
+                <Check size={10} />
+                {tag}
+              </button>
+            ))}
+        </div>
+
+        {/* Custom restriction free-text input */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={customPrecaution}
+            onChange={(e) => setCustomPrecaution(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAddCustomPrecaution();
+              }
+            }}
+            placeholder="Add custom instruction..."
+            className="flex-1 rounded-xl border border-border bg-background px-4 py-2.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/45 transition-all min-h-[44px]"
+          />
+          <button
+            type="button"
+            onClick={handleAddCustomPrecaution}
+            disabled={!customPrecaution.trim()}
+            className="flex items-center gap-1.5 rounded-xl border border-border bg-background hover:bg-muted px-4 py-2.5 text-xs font-bold text-foreground transition-all focus:outline-none disabled:opacity-40 min-h-[44px] flex-shrink-0"
+          >
+            <Plus size={14} />
+            Add
+          </button>
         </div>
       </div>
 

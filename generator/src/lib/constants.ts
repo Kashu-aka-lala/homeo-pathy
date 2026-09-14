@@ -97,6 +97,7 @@ export const VEHICLES = [
   'Globules',
   'Tablets',
   'External Ointment',
+  'External Cream',
 ];
 
 export const DIET_PRECAUTIONS_PRESETS = [

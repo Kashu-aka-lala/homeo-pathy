@@ -82,6 +82,61 @@ export async function createPatient(
   }
 }
 
+/**
+ * Deletes a patient and cascades deletion of all associated consultations,
+ * invoices, and prescriptions. If the DB has ON DELETE CASCADE configured,
+ * only the patient row needs to be deleted — this function handles both cases.
+ */
+export async function deletePatient(
+  patientId: string
+): Promise<ServiceResult<boolean>> {
+  if (!isSupabaseConfigured || !supabase) {
+    return { data: null, error: 'Supabase is not configured.' };
+  }
+
+  try {
+    // 1. Fetch all consultations for this patient
+    const { data: consultations } = await supabase
+      .from('consultations')
+      .select('id')
+      .eq('patient_id', patientId);
+
+    if (consultations && consultations.length > 0) {
+      const consultationIds = consultations.map((c: any) => c.id);
+
+      // 2. Delete prescriptions linked to those consultations
+      await supabase
+        .from('prescriptions')
+        .delete()
+        .in('consultation_id', consultationIds);
+
+      // 3. Delete invoices linked to those consultations
+      await supabase
+        .from('invoices')
+        .delete()
+        .in('consultation_id', consultationIds);
+
+      // 4. Delete consultations
+      await supabase
+        .from('consultations')
+        .delete()
+        .eq('patient_id', patientId);
+    }
+
+    // 5. Delete the patient
+    const { error } = await supabase
+      .from('patients')
+      .delete()
+      .eq('id', patientId);
+
+    if (error) return { data: null, error: error.message };
+    return { data: true, error: null };
+  } catch (err: any) {
+    return { data: null, error: err?.message ?? 'Unknown error deleting patient.' };
+  }
+}
+
+
 // ─── Consultation ─────────────────────────────────────────────────────────────
 
 export async function createConsultation(

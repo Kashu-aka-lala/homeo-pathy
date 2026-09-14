@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { 
   Search, UserPlus, Phone, MapPin, Activity, 
   PlusCircle, Edit2, Calendar, FileText, CheckCircle2, 
-  Clock, AlertCircle, Eye, RefreshCw, ArrowLeft, ChevronDown, ChevronUp
+  Clock, AlertCircle, Eye, RefreshCw, ArrowLeft, ChevronDown, ChevronUp, Trash2
 } from 'lucide-react';
 import { useEmrStore } from '@/lib/store';
 import { Patient, Consultation, Invoice, Prescription, supabase } from '@/lib/storage';
@@ -19,7 +19,7 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
   const { 
     patients, consultations, invoices, prescriptions, 
     selectedPatientId, setSelectedPatientId, setActiveConsultationId,
-    addConsultation, addInvoice, loadData, updateInvoice
+    addConsultation, addInvoice, loadData, updateInvoice, deletePatient
   } = useEmrStore();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,6 +27,8 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
   const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null);
   const [isStartingConsultation, setIsStartingConsultation] = useState(false);
   const [expandedConsultationId, setExpandedConsultationId] = useState<string | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [isDeletingPatient, setIsDeletingPatient] = useState(false);
 
   // 1. Filtered Patients list
   const filteredPatients = useMemo(() => {
@@ -77,6 +79,18 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
   const handleCreateNewPatient = () => {
     setPatientToEdit(null);
     setIsModalOpen(true);
+  };
+
+  const handleDeletePatient = async (patientId: string) => {
+    setIsDeletingPatient(true);
+    try {
+      await deletePatient(patientId);
+    } catch (err) {
+      console.error('Failed to delete patient:', err);
+    } finally {
+      setIsDeletingPatient(false);
+      setConfirmDeleteId(null);
+    }
   };
 
   const handleInitiateConsultation = async () => {
@@ -178,10 +192,10 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 h-[calc(100vh-140px)] max-h-[800px]">
+    <div className="flex flex-col md:grid md:grid-cols-12 gap-6 md:h-[calc(100vh-140px)] md:max-h-[800px] min-h-0">
       {/* ----------------- LEFT PANEL: Patient Search & List ----------------- */}
-      <div className={`md:col-span-4 flex flex-col bg-card border border-border rounded-2xl overflow-hidden shadow-sm h-full ${
-        selectedPatientId ? 'hidden md:flex' : 'flex'
+      <div className={`md:col-span-4 flex flex-col bg-card border border-border rounded-2xl overflow-hidden shadow-sm md:h-full ${
+        selectedPatientId ? 'hidden md:flex' : 'flex h-[calc(100svh-180px)]'
       }`}>
         {/* Search Header */}
         <div className="p-4 border-b border-border bg-muted/20 space-y-3">
@@ -221,13 +235,16 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
                 <div
                   key={p.id}
                   onClick={() => setSelectedPatientId(p.id)}
-                  className={`group relative flex flex-col p-4 rounded-xl border transition-all duration-300 cursor-pointer ${
+                  className={`group relative flex flex-col p-4 sm:p-5 rounded-2xl border transition-all duration-300 cursor-pointer overflow-hidden min-h-[72px] ${
                     isSelected
-                      ? 'bg-accent/40 border-primary/40 shadow-sm'
-                      : 'bg-background hover:bg-muted/30 border-border'
+                      ? 'bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/40 shadow-sm shadow-primary/5'
+                      : 'bg-background hover:bg-muted/40 border-border hover:border-primary/20'
                   }`}
                 >
-                  <div className="flex items-start justify-between">
+                  {isSelected && (
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary to-primary/50 shadow-[0_0_8px_rgba(var(--primary),0.5)]"></div>
+                  )}
+                  <div className="flex items-start justify-between relative z-10">
                     <div>
                       <h4 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors">
                         {p.full_name}
@@ -237,15 +254,24 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
                         {p.phone}
                       </p>
                     </div>
-                    <button
-                      onClick={(e) => handleEditPatient(p, e)}
-                      className="opacity-0 group-hover:opacity-100 rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
-                      title="Edit Profile"
-                    >
-                      <Edit2 size={12} />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={(e) => handleEditPatient(p, e)}
+                        className="opacity-0 group-hover:opacity-100 rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-all duration-200"
+                        title="Edit Profile"
+                      >
+                        <Edit2 size={12} />
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(p.id); }}
+                        className="opacity-0 group-hover:opacity-100 rounded-lg p-1.5 text-muted-foreground hover:bg-rose-500/10 hover:text-rose-500 transition-all duration-200"
+                        title="Delete Patient"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 mt-3 text-[11px] text-muted-foreground font-medium">
+                  <div className="flex items-center gap-3 mt-3 text-[11px] text-muted-foreground font-medium relative z-10">
                     <span className="bg-muted px-2 py-0.5 rounded-md">
                       {p.gender}, {p.age} yrs
                     </span>
@@ -254,6 +280,37 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
                       {p.city}
                     </span>
                   </div>
+
+                  {/* Inline confirmation dialog */}
+                  {confirmDeleteId === p.id && (
+                    <div
+                      className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 rounded-2xl bg-background/95 backdrop-blur-sm border border-rose-500/30 p-4 animate-fade-in"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center gap-2 text-rose-500">
+                        <Trash2 size={16} />
+                        <span className="text-xs font-bold">Delete this patient?</span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
+                        This will permanently remove <span className="font-bold text-foreground">{p.full_name}</span> and all their consultations, invoices, and prescriptions.
+                      </p>
+                      <div className="flex gap-2 w-full">
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="flex-1 rounded-xl border border-border bg-background py-2 text-xs font-semibold text-foreground hover:bg-muted transition-colors focus:outline-none"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => handleDeletePatient(p.id)}
+                          disabled={isDeletingPatient}
+                          className="flex-1 rounded-xl bg-rose-500 py-2 text-xs font-bold text-white hover:bg-rose-600 transition-colors focus:outline-none disabled:opacity-60"
+                        >
+                          {isDeletingPatient ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })
@@ -262,8 +319,8 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
       </div>
 
       {/* ----------------- RIGHT PANEL: Patient Chronological History ----------------- */}
-      <div className={`md:col-span-8 bg-card border border-border rounded-2xl overflow-hidden shadow-sm flex flex-col h-full ${
-        selectedPatientId ? 'flex' : 'hidden md:flex'
+      <div className={`md:col-span-8 bg-card border border-border rounded-2xl overflow-hidden shadow-sm flex flex-col md:h-full ${
+        selectedPatientId ? 'flex h-[calc(100svh-140px)]' : 'hidden md:flex'
       }`}>
         {selectedPatient ? (
           <div className="flex flex-col h-full overflow-hidden">
@@ -330,6 +387,13 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
                   <Edit2 size={13} />
                   Edit Profile
                 </button>
+                <button
+                  onClick={() => setConfirmDeleteId(selectedPatient.id)}
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-rose-500/30 bg-rose-500/5 px-4 py-2.5 text-xs font-semibold text-rose-500 hover:bg-rose-500/15 transition-colors focus:outline-none"
+                >
+                  <Trash2 size={13} />
+                  Delete Patient
+                </button>
               </div>
             </div>
 
@@ -359,10 +423,10 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
                     return (
                       <div key={c.id} className="relative animate-slide-up">
                         {/* Timeline node dot */}
-                        <span className={`absolute -left-[31px] top-4 flex h-4 w-4 items-center justify-center rounded-full border bg-background ${
-                          isDraft ? 'border-amber-500' : 'border-emerald-600'
+                        <span className={`absolute -left-[31px] top-4 flex h-5 w-5 items-center justify-center rounded-full border shadow-sm z-10 ${
+                          isDraft ? 'bg-background border-amber-500 shadow-amber-500/20' : 'bg-background border-emerald-600 shadow-emerald-500/20'
                         }`}>
-                          <span className={`h-2 w-2 rounded-full ${
+                          <span className={`h-2.5 w-2.5 rounded-full ${
                             isDraft ? 'bg-amber-500 animate-ping' : 'bg-emerald-600'
                           }`} />
                         </span>
@@ -370,14 +434,15 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
                         {/* Timeline content card */}
                         <div 
                           onClick={() => setExpandedConsultationId(isExpanded ? null : c.id)}
-                          className={`bg-background border rounded-xl overflow-hidden shadow-xs hover:border-primary/45 transition-all duration-300 cursor-pointer ${
-                            isExpanded ? 'border-primary/30 ring-1 ring-primary/5' : 'border-border'
+                          className={`glass-card rounded-2xl overflow-hidden shadow-sm hover:shadow transition-all duration-300 cursor-pointer ${
+                            isExpanded ? 'border-primary/40 ring-2 ring-primary/10 shadow-md' : 'border-border/60 hover:border-primary/30'
                           }`}
                         >
                           {/* ─── CARD HEADER (Always Visible Summary) ─── */}
-                          <div className="p-4 flex items-center justify-between gap-4 select-none">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                              <span className="text-xs font-semibold text-muted-foreground">{dateFormatted}</span>
+                          <div className="p-4 sm:p-5 flex items-center justify-between gap-4 select-none relative overflow-hidden">
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/5 opacity-0 hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 relative z-10">
+                              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">{dateFormatted}</span>
                               <div className="flex items-center gap-2">
                                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${
                                   c.consultation_type.toUpperCase() === 'COMPLIMENTARY' 
@@ -425,20 +490,20 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
 
                           {/* ─── CARD EXPANDED CONTENT ─── */}
                           {isExpanded && (
-                            <div className="px-4 pb-4 border-t border-border/40 pt-4 space-y-4 cursor-default animate-fade-in" onClick={(e) => e.stopPropagation()}>
+                            <div className="px-4 sm:px-5 pb-5 border-t border-border/30 pt-5 space-y-5 cursor-default animate-fade-in bg-muted/10" onClick={(e) => e.stopPropagation()}>
                               {/* Clinical notes */}
                               {c.doctor_notes ? (
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Clinical Notes / Symptoms</span>
-                                  <p className="text-xs text-foreground mt-1 whitespace-pre-line bg-muted/40 rounded-lg p-2.5 border border-border/40 leading-relaxed">
+                                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground block mb-2">Clinical Notes & Symptoms</span>
+                                  <p className="text-sm text-foreground whitespace-pre-line bg-background/60 rounded-xl p-4 border border-border/50 shadow-sm leading-relaxed">
                                     {c.doctor_notes}
                                   </p>
                                 </div>
                               ) : (
                                 <div>
-                                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground block">Clinical Notes / Symptoms</span>
-                                  <p className="text-xs text-muted-foreground/80 mt-1 italic">
-                                    No notes recorded.
+                                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground block mb-2">Clinical Notes & Symptoms</span>
+                                  <p className="text-sm text-muted-foreground/60 italic bg-background/40 rounded-xl p-4 border border-border/30">
+                                    No notes recorded for this session.
                                   </p>
                                 </div>
                               )}
@@ -605,19 +670,21 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
             </div>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-muted/5">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 flex items-center justify-center text-primary mb-4 border border-primary/10 shadow-sm animate-pulse">
-              <Activity size={32} />
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-muted/5 to-background relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05)_0%,transparent_70%)] pointer-events-none"></div>
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 flex items-center justify-center text-primary mb-6 border border-primary/20 shadow-[0_0_30px_rgba(var(--primary),0.1)] relative z-10 group transition-transform duration-500 hover:scale-105">
+              <Activity size={40} className="animate-pulse" />
+              <div className="absolute inset-0 bg-primary/5 rounded-3xl animate-ping opacity-20"></div>
             </div>
-            <h3 className="text-lg font-bold text-foreground">Welcome to Yashfeen Homoeopathic Clinic EMR</h3>
-            <p className="text-sm text-muted-foreground mt-2 max-w-sm leading-relaxed">
-              Select an existing patient profile from the registry directory or register a new one to start consultations, manage invoices, and compose prescriptions.
+            <h3 className="text-xl font-extrabold text-foreground tracking-tight relative z-10">Welcome to Yashfeen <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">EMR</span></h3>
+            <p className="text-sm text-muted-foreground mt-3 max-w-md leading-relaxed relative z-10">
+              Select an existing patient profile from the directory on the left, or register a new one to begin consultations, manage invoices, and compose beautiful prescriptions.
             </p>
             <button
               onClick={handleCreateNewPatient}
-              className="flex items-center gap-2 mt-6 rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground hover:bg-primary/95 transition-all shadow-md focus:outline-none"
+              className="flex items-center gap-2 mt-8 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-sm font-bold text-white hover:from-emerald-500 hover:to-teal-500 transition-all shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 focus:outline-none relative z-10"
             >
-              <UserPlus size={16} />
+              <UserPlus size={18} />
               Register Your First Patient
             </button>
           </div>

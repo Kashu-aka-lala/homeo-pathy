@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import * as storage from './storage';
 import { Patient, Consultation, Invoice, Prescription } from './storage';
 import { DEFAULT_DOCTOR_INFO } from './constants';
+import { deletePatient as deletePatientFromSupabase } from './supabase-service';
 
 interface EmrState {
   patients: Patient[];
@@ -12,6 +13,13 @@ interface EmrState {
   activeConsultationId: string | null;
   doctorInfo: typeof DEFAULT_DOCTOR_INFO;
   isLoading: boolean;
+
+  // ── Wizard stepper ────────────────────────────────────
+  currentStep: number;   // 1-4
+  nextStep: () => void;
+  prevStep: () => void;
+  resetWizard: () => void;
+  // ─────────────────────────────────────────────────────
   
   loadData: () => Promise<void>;
   setSelectedPatientId: (id: string | null) => void;
@@ -19,6 +27,7 @@ interface EmrState {
   
   addPatient: (patient: Omit<Patient, 'id' | 'created_at'>) => Promise<Patient>;
   updatePatient: (patient: Patient) => Promise<Patient>;
+  deletePatient: (patientId: string) => Promise<void>;
   
   addConsultation: (consultation: Omit<Consultation, 'id' | 'created_at'>) => Promise<Consultation>;
   updateConsultation: (consultation: Consultation) => Promise<Consultation>;
@@ -41,6 +50,12 @@ export const useEmrStore = create<EmrState>((set, get) => ({
   activeConsultationId: null,
   doctorInfo: DEFAULT_DOCTOR_INFO,
   isLoading: false,
+
+  // Wizard stepper — starts at step 1, max 4
+  currentStep: 1,
+  nextStep: () => set((s) => ({ currentStep: Math.min(s.currentStep + 1, 4) })),
+  prevStep: () => set((s) => ({ currentStep: Math.max(s.currentStep - 1, 1) })),
+  resetWizard: () => set({ currentStep: 1 }),
 
   loadData: async () => {
     set({ isLoading: true });
@@ -87,7 +102,10 @@ export const useEmrStore = create<EmrState>((set, get) => ({
   },
 
   setSelectedPatientId: (id) => set({ selectedPatientId: id }),
-  setActiveConsultationId: (id) => set({ activeConsultationId: id }),
+  setActiveConsultationId: (id) => {
+    // Reset wizard to step 1 every time a new consultation session is loaded
+    set({ activeConsultationId: id, currentStep: 1 });
+  },
 
   addPatient: async (patientData) => {
     const p = await storage.savePatient(patientData);
@@ -101,6 +119,26 @@ export const useEmrStore = create<EmrState>((set, get) => ({
       patients: state.patients.map((item) => (item.id === p.id ? p : item)),
     }));
     return p;
+  },
+
+  deletePatient: async (patientId) => {
+    // 1. Remove from Supabase (cascades prescriptions, invoices, consultations)
+    await deletePatientFromSupabase(patientId);
+
+    // 2. Collect related consultation IDs for local state cleanup
+    const { consultations } = useEmrStore.getState();
+    const relatedConsultationIds = consultations
+      .filter((c) => c.patient_id === patientId)
+      .map((c) => c.id);
+
+    // 3. Remove patient + all cascading data from local Zustand state
+    set((state) => ({
+      patients:      state.patients.filter((p) => p.id !== patientId),
+      consultations: state.consultations.filter((c) => c.patient_id !== patientId),
+      invoices:      state.invoices.filter((i) => !relatedConsultationIds.includes(i.consultation_id)),
+      prescriptions: state.prescriptions.filter((rx) => !relatedConsultationIds.includes(rx.consultation_id)),
+      selectedPatientId: state.selectedPatientId === patientId ? null : state.selectedPatientId,
+    }));
   },
 
   addConsultation: async (consultationData) => {
