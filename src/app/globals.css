@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@import "./landing.css";
+@source "../";
 
 :root {
   --background: 140 24% 97%;

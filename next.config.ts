@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  output: "export",
 };
 
 export default nextConfig;
