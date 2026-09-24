@@ -263,7 +263,7 @@ export default function PrescriptionPDF({
 
         {/* Patient Details Block */}
         <View style={styles.patientBox}>
-          <Text style={styles.patientTitle}>PATIENT INFRASTRUCTURE</Text>
+          <Text style={styles.patientTitle}>PATIENT PROFILE</Text>
           <View style={styles.patientGrid}>
             <View style={styles.patientCol}>
               <Text style={styles.patientLabel}>Name:</Text>

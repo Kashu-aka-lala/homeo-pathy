@@ -9,7 +9,7 @@ import { Medicine, Prescription } from '@/lib/storage';
 import { REMEDIES, POTENCIES, VEHICLES, DIET_PRECAUTIONS_PRESETS } from '@/lib/constants';
 import { pdf } from '@react-pdf/renderer';
 import PrescriptionPDF from './PrescriptionPDF';
-import { uploadPdfToStorage } from '@/lib/upload-pdf';
+import { uploadPdf } from '@/lib/supabase-service';
 import { sendPrescriptionToPatient } from '@/lib/prescription-sender';
 
 interface PrescriptionBuilderProps {
@@ -210,15 +210,20 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
 
       // Upload file to Supabase
       const fileName = `rx_${saved.id}_${Date.now()}.pdf`;
-      const generatedUrl = await uploadPdfToStorage(pdfBlob, fileName, 'prescriptions');
+      const { data: uploadedUrl, error: uploadError } = await uploadPdf(pdfBlob, fileName, 'prescriptions');
+      
+      let finalUrl = uploadedUrl || URL.createObjectURL(pdfBlob);
+      if (uploadError) {
+        console.warn('PDF upload failed, using local blob URL:', uploadError);
+      } else if (uploadedUrl) {
+        // Only update the database if we got a real URL, not a local blob
+        await updatePrescription({
+          ...saved,
+          pdf_url: uploadedUrl,
+        });
+      }
 
-      // Update prescription with PDF url
-      await updatePrescription({
-        ...saved,
-        pdf_url: generatedUrl,
-      });
-
-      setPdfUrl(generatedUrl);
+      setPdfUrl(finalUrl);
     } catch (e: any) {
       console.error(e);
       setError(`Failed to compile PDF: ${e.message || e}`);
@@ -250,14 +255,19 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
       );
       const pdfBlob = await pdf(rxDoc).toBlob();
       const fileName = `rx_${saved.id}_${Date.now()}.pdf`;
-      const generatedUrl = await uploadPdfToStorage(pdfBlob, fileName, 'prescriptions');
+      const { data: uploadedUrl, error: uploadError } = await uploadPdf(pdfBlob, fileName, 'prescriptions');
 
-      // Update prescription with PDF url
-      await updatePrescription({
-        ...saved,
-        pdf_url: generatedUrl,
-      });
-      setPdfUrl(generatedUrl);
+      let finalUrl = uploadedUrl || URL.createObjectURL(pdfBlob);
+      if (uploadError) {
+        console.warn('PDF upload failed, using local blob URL:', uploadError);
+      } else if (uploadedUrl) {
+        // Update prescription with PDF url only if valid
+        await updatePrescription({
+          ...saved,
+          pdf_url: uploadedUrl,
+        });
+      }
+      setPdfUrl(finalUrl);
 
       // 2. Call the upgraded dual-sharing engine (Shares actual file or downloads + opens WhatsApp Web)
       await sendPrescriptionToPatient({
@@ -266,7 +276,7 @@ export default function PrescriptionBuilder({ consultationId }: PrescriptionBuil
         medicines: saved.medicines,
         precautions: saved.diet_precautions,
         doctorInfo: doctorInfo,
-        pdfUrl: generatedUrl,
+        pdfUrl: uploadedUrl,
       });
 
     } catch (err: any) {
