@@ -104,13 +104,13 @@ export default function Dashboard() {
         <div className="absolute bottom-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/20 to-transparent"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3 group cursor-pointer">
-            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20 border border-emerald-400/20 overflow-hidden transition-transform duration-300 group-hover:scale-105">
-              <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
-              <HeartPulse size={20} className="relative animate-pulse" />
+            <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-transparent shadow-sm border border-emerald-400/20 overflow-hidden transition-transform duration-300 group-hover:scale-105">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Farooq Homeopathic Logo" className="h-full w-full object-contain" />
             </div>
             <div>
               <h1 className="text-base font-extrabold tracking-tight text-foreground sm:text-lg bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-                Yashfeen <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500 font-bold">EMR</span>
+                Farooq Homeopathic <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500 font-bold">EMR</span>
               </h1>
               <p className="text-[10px] text-muted-foreground hidden sm:block font-medium">
                 Clinic of {doctorInfo.name} <span className="mx-1 text-border">&bull;</span> Reg No {doctorInfo.regNo}

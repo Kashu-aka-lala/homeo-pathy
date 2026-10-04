@@ -2,7 +2,7 @@
  * supabase-service.ts
  * ─────────────────────────────────────────────────────────────────────────────
  * Canonical, type-safe service layer for all Supabase interactions in the
- * Yashfeen Homoeopathic Clinic EMR.
+ * Farooq Homeopathic EMR.
  *
  * Rules enforced here:
  *  • Every string field is trimmed before insertion.
@@ -20,7 +20,7 @@ import type { Patient, Consultation, Invoice, Prescription, Medicine } from './s
 
 export type ConsultationType = 'PAID' | 'COMPLIMENTARY';
 export type PaymentStatus    = 'PENDING' | 'PAID' | 'WAIVED';
-export type PaymentMethod    = 'Bank Transfer' | 'Mobile Wallet' | 'Cash' | '';
+export type PaymentMethod    = 'Bank Transfer' | 'Cash' | '';
 
 /** Result wrapper — every service call returns { data, error } */
 export interface ServiceResult<T> {

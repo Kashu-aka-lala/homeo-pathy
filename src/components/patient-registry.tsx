@@ -154,7 +154,7 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
     if (pdfUrl) {
       msg += ` You can view or download it here: ${pdfUrl}`;
     } else {
-      msg += ` Please complete the payment using Bank Transfer or Mobile Wallet.`;
+      msg += ` Please complete the payment via Bank Transfer.`;
     }
     msg += ` Thank you.`;
     const url = `https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(msg)}`;
@@ -672,11 +672,11 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
         ) : (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gradient-to-b from-muted/5 to-background relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(var(--primary),0.05)_0%,transparent_70%)] pointer-events-none"></div>
-            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-emerald-500/10 to-teal-500/10 flex items-center justify-center text-primary mb-6 border border-primary/20 shadow-[0_0_30px_rgba(var(--primary),0.1)] relative z-10 group transition-transform duration-500 hover:scale-105">
-              <Activity size={40} className="animate-pulse" />
-              <div className="absolute inset-0 bg-primary/5 rounded-3xl animate-ping opacity-20"></div>
+            <div className="w-24 h-24 rounded-3xl flex items-center justify-center p-2 mb-6 border border-primary/20 shadow-[0_0_30px_rgba(var(--primary),0.1)] relative z-10 group transition-transform duration-500 hover:scale-105 overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/logo.png" alt="Farooq Homeopathic Logo" className="w-full h-full object-contain drop-shadow-md" />
             </div>
-            <h3 className="text-xl font-extrabold text-foreground tracking-tight relative z-10">Welcome to Yashfeen <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">EMR</span></h3>
+            <h3 className="text-xl font-extrabold text-foreground tracking-tight relative z-10">Welcome to Farooq Homeopathic <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 to-teal-500">EMR</span></h3>
             <p className="text-sm text-muted-foreground mt-3 max-w-md leading-relaxed relative z-10">
               Select an existing patient profile from the directory on the left, or register a new one to begin consultations, manage invoices, and compose beautiful prescriptions.
             </p>

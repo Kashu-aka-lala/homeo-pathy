@@ -157,7 +157,7 @@ export default function InvoicePDF({
   }
 
   const doctorDisplayName = cleanDocName;
-  const logoUrl = typeof window !== 'undefined' ? `${window.location.origin}/logo.jpg` : '';
+  const logoUrl = typeof window !== 'undefined' ? `${window.location.origin}/logo.png` : '';
 
   return (
     <Document>
@@ -165,10 +165,10 @@ export default function InvoicePDF({
         {/* Clinic & Doctor Header */}
         <View style={styles.header}>
           <View style={styles.headerText}>
-            <Text style={styles.clinicName}>YASHFEEN HOMOEOPATHIC CLINIC</Text>
+            <Text style={styles.clinicName}>FAROOQ HOMEOPATHIC</Text>
             <Text style={styles.doctorName}>DR. UMAR FAROOQ • DHMS (RMP) Physician</Text>
             <Text style={styles.subText}>
-              {doctorInfo.regNo ? `Reg No: ${doctorInfo.regNo} | ` : ''}Contact: {doctorInfo.contact || '+92 300 1234567'}
+              {doctorInfo.regNo ? `Reg No: ${doctorInfo.regNo} | ` : ''}Contact: {doctorInfo.contact || '03455496698'}
             </Text>
           </View>
           {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : null}
@@ -216,10 +216,9 @@ export default function InvoicePDF({
         {/* Account Details */}
         <View style={styles.paymentCard}>
           <Text style={styles.paymentHeading}>Official Payment Account Details</Text>
-          <Text style={styles.paymentDetailRow}>• Bank: Meezan Bank / Askari Bank</Text>
-          <Text style={styles.paymentDetailRow}>• Account Title: {doctorDisplayName}</Text>
-          <Text style={styles.paymentDetailRow}>• IBAN / Account #: PK00XXXX00000000000000</Text>
-          <Text style={styles.paymentDetailRow}>• Easypaisa / JazzCash: {doctorInfo.contact || '0300-1234567'}</Text>
+          <Text style={styles.paymentDetailRow}>• Bank: HBL (Habib Bank Limited)</Text>
+          <Text style={styles.paymentDetailRow}>• Account Title: Umer Farooq</Text>
+          <Text style={styles.paymentDetailRow}>• Account #: 06027900515403</Text>
         </View>
 
         <Text style={styles.footer}>

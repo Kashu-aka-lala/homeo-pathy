@@ -1,13 +1,13 @@
-// Yashfeen EMR Constants & Catalogs
+// Farooq Homeopathic EMR Constants & Catalogs
 
 export const DEFAULT_DOCTOR_INFO = {
   name: 'Dr. Umar Farooq',
   degree: 'DHMS (RMP) — Physician & Homoeopath',
   regNo: 'RHMP012245',
-  clinicName: 'Yashfeen Homoeopathic Clinic',
-  address: 'Yashfeen Homoeopathic Clinic, PK',
-  phone: '+92 300 1234567',
-  email: 'contact@yashfeen.com',
+  clinicName: 'Farooq Homeopathic',
+  address: 'Farooq Homeopathic, PK',
+  phone: '03455496698',
+  email: 'contact@farooqhomeopathic.com',
 };
 
 export const REMEDIES = [

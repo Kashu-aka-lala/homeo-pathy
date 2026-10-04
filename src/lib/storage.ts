@@ -26,7 +26,7 @@ export interface Invoice {
   consultation_id: string;
   amount: number;
   payment_status: 'Pending' | 'Paid' | 'Waived' | 'PENDING' | 'PAID' | 'WAIVED';
-  payment_method?: 'Bank Transfer' | 'Mobile Wallet' | 'Cash' | '';
+  payment_method?: 'Bank Transfer' | 'Cash' | '';
   paid_at?: string | null;
   pdf_url?: string | null;
   created_at?: string;

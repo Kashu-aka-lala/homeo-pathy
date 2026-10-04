@@ -56,7 +56,7 @@ export default function ConsultationWorkflow({ onBack }: ConsultationWorkflowPro
   const [consultationType, setConsultationType] = useState<'PAID' | 'COMPLIMENTARY'>('PAID');
   const [doctorNotes, setDoctorNotes]           = useState('');
   const [amount, setAmount]                     = useState('500');
-  const [paymentMethod, setPaymentMethod]       = useState<'Bank Transfer' | 'Mobile Wallet' | 'Cash' | ''>('');
+  const [paymentMethod, setPaymentMethod]       = useState<'Bank Transfer' | 'Cash' | ''>('');
   const [paymentStatus, setPaymentStatus]       = useState<'PENDING' | 'PAID' | 'WAIVED'>('PENDING');
 
   // ── UI state ─────────────────────────────────────────────────────────────────
@@ -298,7 +298,6 @@ export default function ConsultationWorkflow({ onBack }: ConsultationWorkflowPro
             >
               <option value="">-- Select Payment Method --</option>
               <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Mobile Wallet">Mobile Wallet</option>
               <option value="Cash">Cash</option>
             </select>
           </div>

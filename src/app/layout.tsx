@@ -19,9 +19,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: 'Yashfeen EMR — Yashfeen Homoeopathic Clinic Management System',
+  title: 'Farooq Homeopathic EMR — Farooq Homeopathic Clinic Management System',
   description: 'Manage homeopathic patient consultations, generate branded invoices and prescriptions, and dispatch PDFs via WhatsApp.',
-  keywords: ['Homeopathy', 'EMR', 'Clinic Management', 'Prescription Builder', 'WhatsApp Dispatch', 'Yashfeen Clinic'],
+  keywords: ['Homeopathy', 'EMR', 'Clinic Management', 'Prescription Builder', 'WhatsApp Dispatch', 'Farooq Homeopathic'],
 };
 
 export default function RootLayout({

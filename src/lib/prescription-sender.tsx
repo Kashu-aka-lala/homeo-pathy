@@ -109,7 +109,7 @@ export async function sendPrescriptionToPatient({
     ? precautions.map((p) => ` • ${p}`).join('\n')
     : ' • None specified';
 
-  let messageText = `*Assalam-o-Alaikum ${patient.full_name},*\n\nYour prescription from *${cleanDocName}* (${doctorInfo.clinicName || 'Yashfeen Homoeopathic Clinic'}) is ready.`;
+  let messageText = `*Assalam-o-Alaikum ${patient.full_name},*\n\nYour prescription from *${cleanDocName}* (${doctorInfo.clinicName || 'Farooq Homeopathic'}) is ready.`;
 
   if (permanentUrl) {
     messageText += `\n\n*Prescription Link:* ${permanentUrl}`;
@@ -205,17 +205,16 @@ export async function sendInvoiceToPatient({
   const messageText = [
     `*Assalam-o-Alaikum ${patient.full_name},*`,
     ``,
-    `Your consultation fee invoice from *${doctorInfo.clinicName || 'Yashfeen Homoeopathic Clinic'}* is ready.`,
+    `Your consultation fee invoice from *${doctorInfo.clinicName || 'Farooq Homeopathic'}* is ready.`,
     ``,
     `*Fee Amount:* Rs. ${fee}`,
     `*Payment Method:* ${paymentMethod}`,
     permanentUrl ? `*Invoice Link:* ${permanentUrl}` : null,
     ``,
     `*Official Payment Account Details:*`,
-    `- Bank: Meezan Bank / Askari Bank`,
-    `- Account Title: ${cleanDocName}`,
-    `- IBAN / Account #: PK00XXXX00000000000000`,
-    `- Easypaisa / JazzCash: ${doctorInfo.phone}`,
+    `- Bank: HBL (Habib Bank Limited)`,
+    `- Account Title: Umer Farooq`,
+    `- Account #: 06027900515403`,
     ``,
     `_After completing the fund transfer, kindly send a screenshot of the payment receipt to start your consultation. Wishing you good health!_`,
     ``,
