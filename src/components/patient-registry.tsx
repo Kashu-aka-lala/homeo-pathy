@@ -149,20 +149,14 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
     onStartConsultation();
   };
 
-  const handleShareInvoiceWhatsApp = (patientName: string, phone: string, amount: number, pdfUrl?: string | null) => {
-    let msg = `Assalam-o-Alaikum ${patientName}, your invoice for fee amount Rs. ${amount} is ready.`;
-    if (pdfUrl) {
-      msg += ` You can view or download it here: ${pdfUrl}`;
-    } else {
-      msg += ` Please complete the payment via Bank Transfer.`;
-    }
-    msg += ` Thank you.`;
+  const handleShareInvoiceWhatsApp = (patientName: string, phone: string, amount: number) => {
+    const msg = `Assalam-o-Alaikum ${patientName}, your invoice for fee amount Rs. ${amount} is ready. Please complete the payment via Bank Transfer. Thank you.`;
     const url = `https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
 
-  const handleShareRxWhatsApp = (patientName: string, phone: string, pdfUrl: string, precautions: string[] = []) => {
-    let msg = `Assalam-o-Alaikum ${patientName}, your prescription is ready. You can view or download it here: ${pdfUrl}`;
+  const handleShareRxWhatsApp = (patientName: string, phone: string, precautions: string[] = []) => {
+    let msg = `Assalam-o-Alaikum ${patientName}, your prescription is ready.`;
     if (precautions && precautions.length > 0) {
       msg += `\n\nDietary Restrictions & Instructions:\n• ${precautions.join('\n• ')}`;
     }

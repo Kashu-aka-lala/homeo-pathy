@@ -111,11 +111,7 @@ export async function sendPrescriptionToPatient({
 
   let messageText = `*Assalam-o-Alaikum ${patient.full_name},*\n\nYour prescription from *${cleanDocName}* (${doctorInfo.clinicName || 'Farooq Homeopathic'}) is ready.`;
 
-  if (permanentUrl) {
-    messageText += `\n\n*Prescription Link:* ${permanentUrl}`;
-  } else {
-    messageText += `\n\nYour prescription PDF has been downloaded to your device.`;
-  }
+
 
   messageText += `\n\n*Dietary Precautions & Instructions:*\n${formattedPrecautions}\n\n_Please take the remedies strictly as directed. Wishing you good health!_\n\n_— ${cleanDocName}, ${doctorInfo.clinicName}_`;
 
@@ -209,7 +205,7 @@ export async function sendInvoiceToPatient({
     ``,
     `*Fee Amount:* Rs. ${fee}`,
     `*Payment Method:* ${paymentMethod}`,
-    permanentUrl ? `*Invoice Link:* ${permanentUrl}` : null,
+
     ``,
     `*Official Payment Account Details:*`,
     `- Bank: HBL (Habib Bank Limited)`,
