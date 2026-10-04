@@ -149,16 +149,17 @@ export default function PatientRegistry({ onStartConsultation }: PatientRegistry
     onStartConsultation();
   };
 
-  const handleShareInvoiceWhatsApp = (patientName: string, phone: string, amount: number) => {
+  const handleShareInvoiceWhatsApp = (patientName: string, phone: string, amount: number, _pdfUrl?: string | null) => {
     const msg = `Assalam-o-Alaikum ${patientName}, your invoice for fee amount Rs. ${amount} is ready. Please complete the payment via Bank Transfer. Thank you.`;
     const url = `https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
 
-  const handleShareRxWhatsApp = (patientName: string, phone: string, precautions: string[] = []) => {
+  const handleShareRxWhatsApp = (patientName: string, phone: string, _pdfUrlOrPrecautions?: string | string[], precautions: string[] = []) => {
     let msg = `Assalam-o-Alaikum ${patientName}, your prescription is ready.`;
-    if (precautions && precautions.length > 0) {
-      msg += `\n\nDietary Restrictions & Instructions:\n• ${precautions.join('\n• ')}`;
+    const prec = Array.isArray(_pdfUrlOrPrecautions) ? _pdfUrlOrPrecautions : precautions;
+    if (prec && prec.length > 0) {
+      msg += `\n\nDietary Restrictions & Instructions:\n• ${prec.join('\n• ')}`;
     }
     const url = `https://wa.me/${phone.replace('+', '')}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
